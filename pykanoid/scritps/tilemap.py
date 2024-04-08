@@ -1,7 +1,7 @@
 import pygame
 from pygame import Surface
 
-from pykanoid.scritps.tile import Tile, TileColor, _STRENGTH
+from pykanoid.scritps.tile import Tile, TileColor
 from pykanoid.scritps.utils import load_images, RANDOM_GENERATOR
 from pykanoid.settings import *
 
