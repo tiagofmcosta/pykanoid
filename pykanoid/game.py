@@ -5,16 +5,16 @@ import pygame
 
 from pykanoid.scritps.entities import Ball, Paddle
 from pykanoid.scritps.header import Header
-from pykanoid.settings import *
 from pykanoid.scritps.status import Status, State
 from pykanoid.scritps.tilemap import Tilemap
-from pykanoid.scritps.utils import load_image, load_images, RANDOM_GENERATOR
+from pykanoid.scritps.utils import load_image, RANDOM_GENERATOR
+from pykanoid.settings import *
 
 
 class Game:
     __PADDLE_OFFSET_Y = 100
 
-    HEADER_AREA_SIZE = (WINDOW_WIDTH, 44)
+    HEADER_AREA_SIZE = (WINDOW_WIDTH, 40)
     GAME_AREA_SIZE = (WINDOW_WIDTH, WINDOW_HEIGHT - HEADER_AREA_SIZE[1])
 
     def __init__(self):

@@ -11,7 +11,7 @@ class Header:
         self.__life_asset = pygame.transform.scale(
             load_image("life/heart_48.png"), (24, 24)
         )
-        self.__font = pygame.font.Font(None, 36)
+        self.__font = pygame.font.Font("data/font/PixelEmulator-xq08.ttf", 24)
 
     def update(self, status: Status):
         self.__status = status
@@ -26,5 +26,5 @@ class Header:
             str(self.__status.score), False, (255, 255, 255, 255)
         )
         surface.blit(
-            score_surface, (surface.get_width() - score_surface.get_width() - gap, gap)
+            score_surface, (surface.get_width() - score_surface.get_width() - gap, gap / 2)
         )
