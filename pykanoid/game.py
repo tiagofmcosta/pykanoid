@@ -1,7 +1,9 @@
 import sys
+import time
 
 import pygame
 
+from pykanoid.debug import debug
 from pykanoid.entities import Ball, Paddle
 from pykanoid.header import Header
 from pykanoid.status import Status, State
@@ -69,7 +71,13 @@ class Game:
         )
 
     def run(self):
+        previous_time = time.time()
         while True:
+            self.clock.tick(165)
+
+            dt = time.time() - previous_time
+            previous_time = time.time()
+
             self.game_surface.fill(BACKGROUND_COLOR)
             self.header_surface.fill(BACKGROUND_COLOR)
 
@@ -97,7 +105,7 @@ class Game:
                         self.ball.launch()
                         self.status.set_state(State.PLAYING)
 
-            self.paddle.update((self.movement[1] - self.movement[0], 0))
+            self.paddle.update(dt, (self.movement[1] - self.movement[0], 0))
 
             if self.status.state == State.IDLE:
                 self.game_surface.blit(
@@ -108,12 +116,12 @@ class Game:
                         self.game_surface.get_height() - self.__PADDLE_OFFSET_Y * 2.5,
                     ),
                 )
-                self.ball.update((self.movement[1] - self.movement[0], 0))
+                self.ball.update(dt)
             elif self.status.state == State.START:
                 self.tilemap.generate_random()
                 self.status.set_state(State.WAITING_BALL_RELEASE)
             elif self.status.state == State.PLAYING:
-                self.ball.move()
+                self.ball.update(dt)
             elif self.status.state == State.LIFE_LOST:
                 self.ball.reset()
                 if self.status.lives == 0:
@@ -123,7 +131,7 @@ class Game:
             elif self.status.state == State.LEVEL_CLEARED:
                 self.status.set_state(State.GAME_WON)
             elif self.status.state == State.WAITING_BALL_RELEASE:
-                self.ball.update((self.movement[1] - self.movement[0], 0))
+                self.ball.update(dt)
             elif self.status.state == State.GAME_LOST:
                 self.status.set_state(State.IDLE)
             elif self.status.state == State.GAME_WON:
@@ -142,4 +150,3 @@ class Game:
             self.screen.blit(self.game_surface, (0, self.HEADER_AREA_SIZE[1]))
 
             pygame.display.update()
-            self.clock.tick(60)
