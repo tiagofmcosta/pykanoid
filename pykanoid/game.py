@@ -3,13 +3,12 @@ import time
 
 import pygame
 
-from pykanoid.debug import debug
 from pykanoid.entities import Ball, Paddle
 from pykanoid.header import Header
+from pykanoid.settings import *
 from pykanoid.status import Status, State
 from pykanoid.tilemap import Tilemap
 from pykanoid.utils import load_image, RANDOM_GENERATOR
-from pykanoid.settings import *
 
 
 class Game:
@@ -25,8 +24,6 @@ class Game:
         self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
         self.header_surface = pygame.Surface(self.HEADER_AREA_SIZE)
         self.game_surface = pygame.Surface(self.GAME_AREA_SIZE)
-
-        self.clock = pygame.time.Clock()
 
         self.status = Status()
 
@@ -73,8 +70,6 @@ class Game:
     def run(self):
         previous_time = time.time()
         while True:
-            self.clock.tick(165)
-
             dt = time.time() - previous_time
             previous_time = time.time()
 
