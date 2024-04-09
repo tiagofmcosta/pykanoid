@@ -1,8 +1,9 @@
 import pygame
 from pygame import Surface
+from pytmx.util_pygame import load_pygame
 
-from pykanoid.scritps.tile import Tile, TileColor
-from pykanoid.scritps.utils import load_images, RANDOM_GENERATOR
+from pykanoid.tile import Tile, TileColor
+from pykanoid.utils import load_images, RANDOM_GENERATOR
 from pykanoid.settings import *
 
 NEIGHBOR_OFFSETS = [
@@ -28,12 +29,18 @@ class Tilemap:
 
         self.__assets: dict[str, dict[TileColor, dict[str, Surface]]] = {"tiles": {}}
         for t_color in TileColor:
-            self.__assets["tiles"][t_color] = load_images("tiles/%s" % t_color)
+            self.__assets["tiles"][t_color] = load_images(f"tiles/{t_color}")
 
+        title_map_data = load_pygame("data/levels/title_map.tmx")
+        self.title_map_layer = title_map_data.get_layer_by_name("base")
+
+    def generate_random(self):
         colors = [c for c in list(TileColor) if c != TileColor.GREY]
-
         for x in range(self.grid_size[0]):
             for y in range(self.grid_size[1]):
+                if RANDOM_GENERATOR.random() > 0.65:
+                    continue
+
                 location = (x, y)
                 self.tilemap[location] = Tile(RANDOM_GENERATOR.choice(colors), location)
 
@@ -49,13 +56,16 @@ class Tilemap:
                 tiles.append(self.tilemap[check_loc])
         return tiles
 
-    def rects(self, tiles):
+    def tile_list(self):
+        return list(self.tilemap.values())
+
+    def rects(self):
         rects = []
-        for tile in tiles:
+        for position in self.tilemap:
             rects.append(
                 pygame.Rect(
-                    tile.position[0] * self.tile_size[0],
-                    tile.position[1] * self.tile_size[1],
+                    position[0] * self.tile_size[0],
+                    position[1] * self.tile_size[1],
                     self.tile_size[0],
                     self.tile_size[1],
                 )
@@ -72,7 +82,23 @@ class Tilemap:
             else:
                 del self.tilemap[tile.position]
 
+    def __draw_border_on_tile_surface(self, surface: Surface):
+        pygame.draw.rect(
+            surface,
+            BACKGROUND_COLOR,
+            [0, 0, self.tile_size[0], self.tile_size[1]],
+            1,
+        )
+
     def render(self, surface: pygame.Surface):
+        if not self.tilemap:
+            for x, y, image in self.title_map_layer.tiles():
+                self.__draw_border_on_tile_surface(image)
+                surface.blit(
+                    image,
+                    (x * self.tile_size[0], y * self.tile_size[1]),
+                )
+
         for tile in self.offgrid_tiles:
             surface.blit(
                 self.__assets["tiles"][tile.color][tile.variant + ".png"],
@@ -82,17 +108,7 @@ class Tilemap:
         for position in self.tilemap:
             tile = self.tilemap[position]
             image = self.__assets["tiles"][tile.color][tile.variant + ".png"]
-            pygame.draw.rect(
-                image,
-                BACKGROUND_COLOR,
-                [
-                    0,
-                    0,
-                    self.tile_size[0],
-                    self.tile_size[1],
-                ],
-                1,
-            )
+            self.__draw_border_on_tile_surface(image)
             surface.blit(
                 image,
                 (

@@ -1,13 +1,12 @@
 import sys
-import time
 
 import pygame
 
-from pykanoid.scritps.entities import Ball, Paddle
-from pykanoid.scritps.header import Header
-from pykanoid.scritps.status import Status, State
-from pykanoid.scritps.tilemap import Tilemap
-from pykanoid.scritps.utils import load_image, RANDOM_GENERATOR
+from pykanoid.entities import Ball, Paddle
+from pykanoid.header import Header
+from pykanoid.status import Status, State
+from pykanoid.tilemap import Tilemap
+from pykanoid.utils import load_image, RANDOM_GENERATOR
 from pykanoid.settings import *
 
 
@@ -64,50 +63,15 @@ class Game:
 
         self.tilemap = Tilemap(self)
 
-    def run(self):
-        last_time = time.time_ns()
-        while True:
-            dt = time.time_ns() - last_time
-            last_time = time.time_ns()
+        self.__font = pygame.font.Font(FONT_FILE_PATH, 36)
+        self.start_instructions_surface = self.__font.render(
+            "Press ENTER to start", False, "White"
+        )
 
+    def run(self):
+        while True:
             self.game_surface.fill(BACKGROUND_COLOR)
             self.header_surface.fill(BACKGROUND_COLOR)
-
-            if self.status.state == State.IDLE:
-                self.ball.update()
-            elif self.status.state == State.START:
-                self.status.set_state(State.IDLE)
-            elif self.status.state == State.PLAYING:
-                self.ball.move()
-            elif self.status.state == State.PAUSED:
-                pass
-            elif self.status.state == State.LIFE_LOST:
-                self.ball.reset()
-                if self.status.lives == 0:
-                    self.status.set_state(State.GAME_LOST)
-                else:
-                    self.status.set_state(State.IDLE)
-            elif self.status.state == State.GAME_LOST:
-                self.status.set_state(State.RESET)
-            elif self.status.state == State.GAME_WON:
-                self.status.set_state(State.RESET)
-            elif self.status.state == State.NEXT_LEVEL:
-                pass
-            elif self.status.state == State.LEVEL_CLEARED:
-                self.status.set_state(State.GAME_WON)
-            elif self.status.state == State.RESET:
-                self.tilemap = Tilemap(self)
-                self.status.set_state(State.START)
-
-            self.header.update(self.status)
-            self.header.render(self.header_surface)
-
-            self.tilemap.render(self.game_surface)
-
-            self.paddle.update((self.movement[1] - self.movement[0], 0))
-            self.paddle.render(self.game_surface)
-
-            self.ball.render(self.game_surface)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -124,20 +88,58 @@ class Game:
                         self.movement[0] = False
                     if event.key == pygame.K_RIGHT:
                         self.movement[1] = False
-                    if event.key == pygame.K_SPACE and self.status.state == State.IDLE:
+                    if event.key == pygame.K_RETURN and self.status.state == State.IDLE:
+                        self.status.set_state(State.START)
+                    if (
+                        event.key == pygame.K_SPACE
+                        and self.status.state == State.WAITING_BALL_RELEASE
+                    ):
+                        self.ball.launch()
                         self.status.set_state(State.PLAYING)
-                        self.ball.start()
+
+            self.paddle.update((self.movement[1] - self.movement[0], 0))
+
+            if self.status.state == State.IDLE:
+                self.game_surface.blit(
+                    self.start_instructions_surface,
+                    (
+                        self.game_surface.get_rect().centerx
+                        - self.start_instructions_surface.get_width() / 2,
+                        self.game_surface.get_height() - self.__PADDLE_OFFSET_Y * 2.5,
+                    ),
+                )
+                self.ball.update((self.movement[1] - self.movement[0], 0))
+            elif self.status.state == State.START:
+                self.tilemap.generate_random()
+                self.status.set_state(State.WAITING_BALL_RELEASE)
+            elif self.status.state == State.PLAYING:
+                self.ball.move()
+            elif self.status.state == State.LIFE_LOST:
+                self.ball.reset()
+                if self.status.lives == 0:
+                    self.status.set_state(State.GAME_LOST)
+                else:
+                    self.status.set_state(State.WAITING_BALL_RELEASE)
+            elif self.status.state == State.LEVEL_CLEARED:
+                self.status.set_state(State.GAME_WON)
+            elif self.status.state == State.WAITING_BALL_RELEASE:
+                self.ball.update((self.movement[1] - self.movement[0], 0))
+            elif self.status.state == State.GAME_LOST:
+                self.status.set_state(State.IDLE)
+            elif self.status.state == State.GAME_WON:
+                self.status.set_state(State.IDLE)
+            elif self.status.state == State.NEXT_LEVEL:
+                pass
+
+            self.header.update(self.status)
+
+            self.header.render(self.header_surface)
+            self.tilemap.render(self.game_surface)
+            self.paddle.render(self.game_surface)
+            self.ball.render(self.game_surface)
 
             self.screen.blit(self.header_surface, (0, 0))
             self.screen.blit(self.game_surface, (0, self.HEADER_AREA_SIZE[1]))
-
-            # pygame.draw.line(
-            #     self.screen,
-            #     'Grey',
-            #     (0, self.HEADER_AREA_SIZE[1]),
-            #     (self.HEADER_AREA_SIZE[0], self.HEADER_AREA_SIZE[1]),
-            #     1,
-            # )
 
             pygame.display.update()
             self.clock.tick(60)
