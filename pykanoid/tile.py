@@ -3,8 +3,8 @@ from enum import auto, StrEnum, unique
 
 @unique
 class TileColor(StrEnum):
-    BLUE = auto()
     GREEN = auto()
+    BLUE = auto()
     YELLOW = auto()
     PURPLE = auto()
     RED = auto()
@@ -18,8 +18,8 @@ class TileVariant(StrEnum):
 
 
 _SCORES = {
-    TileColor.BLUE: 20,
-    TileColor.GREEN: 23,
+    TileColor.GREEN: 20,
+    TileColor.BLUE: 23,
     TileColor.YELLOW: 29,
     TileColor.PURPLE: 38,
     TileColor.RED: 50,
@@ -27,8 +27,8 @@ _SCORES = {
 }
 
 _STRENGTH = {
-    TileColor.BLUE: 1,
-    TileColor.GREEN: 2,
+    TileColor.GREEN: 1,
+    TileColor.BLUE: 2,
     TileColor.YELLOW: 3,
     TileColor.PURPLE: 4,
     TileColor.RED: 5,
