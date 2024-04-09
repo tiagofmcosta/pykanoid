@@ -1,5 +1,5 @@
 import pygame
-from pygame import Rect
+from pygame import Rect, Surface
 
 from pykanoid.status import State
 from pykanoid.tile import Tile
@@ -63,12 +63,18 @@ class Ball(PhysicsEntity):
         self.paddle_hits = 0
 
     def launch(self):
-        self.velocity = [RANDOM_GENERATOR.choice((-1, 1)), -1]
+        game_surface_center_x = self.game.game_surface.get_rect().centerx
+
+        if self.rect().centerx < game_surface_center_x:
+            self.velocity = [-1, -1]
+        elif self.rect().centerx > game_surface_center_x:
+            self.velocity = [1, -1]
+        else:
+            self.velocity = [RANDOM_GENERATOR.choice((-1, 1)), -1]
 
     def reset(self):
         self.acceleration = self.__INITIAL_ACCELERATION
         self.paddle_hits = 0
-        self.velocity = [0, 0]
         self.position = [
             self.game.paddle.position[0]
             + self.game.paddle.asset.get_width() / 2
