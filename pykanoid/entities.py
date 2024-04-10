@@ -74,6 +74,8 @@ class Ball(PhysicsEntity):
         self.velocity = [RANDOM_GENERATOR.choice((-1, 1)), -1]
         self.paddle_hits = 0
         self.acceleration = self.__initial_acceleration
+        self.collision_sound = pygame.mixer.Sound("data/audio/collision.wav")
+        self.collision_sound.set_volume(0.4)
 
     def launch(self):
         self.active = True
@@ -148,6 +150,7 @@ class Ball(PhysicsEntity):
         )
 
         if overlap:
+            self.collision_sound.play()
             # check if collision was from above
             if (
                 abs(entity_rect.bottom - paddle_rect.top) < self.__COLLISION_THRESHOLD
@@ -189,7 +192,9 @@ class Ball(PhysicsEntity):
         tile_recs: list[Rect] = self.game.tilemap.rects()
         collision_tile_index = entity_rect.collidelist(tile_recs)
         if collision_tile_index > 0:
+            self.collision_sound.play()
             self.game.tilemap.trigger_hit(tiles[collision_tile_index])
+
             tile_rec: Rect = tile_recs[collision_tile_index]
 
             # check if collision was from above
