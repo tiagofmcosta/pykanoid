@@ -139,19 +139,20 @@ class Ball(PhysicsEntity):
         entity_mask: pygame.Mask = self.mask()
         paddle_mask: pygame.Mask = self.game.paddle.mask()
 
-        if paddle_mask.overlap(
-            entity_mask,
+        overlap = entity_mask.overlap(
+            paddle_mask,
             (
-                self.position[0] - self.game.paddle.position[0],
-                self.position[1] - self.game.paddle.position[1],
+                self.game.paddle.position[0] - self.position[0],
+                self.game.paddle.position[1] - self.position[1],
             ),
-        ):
+        )
+
+        if overlap:
             # check if collision was from above
             if (
                 abs(entity_rect.bottom - paddle_rect.top) < self.__COLLISION_THRESHOLD
-                and entity_rect.centery <= paddle_rect.centery
-                and self.velocity[1] > 0
-            ):
+                or entity_rect.centery < paddle_rect.centery
+            ) and self.velocity[1] > 0:
                 entity_rect.bottom = paddle_rect.top
                 self.position[1] = entity_rect.y
                 self.velocity[1] *= -1
@@ -159,16 +160,15 @@ class Ball(PhysicsEntity):
             # check if collision was from bellow
             if (
                 abs(entity_rect.top - paddle_rect.bottom) < self.__COLLISION_THRESHOLD
-                and entity_rect.centery >= paddle_rect.centery
-                and self.velocity[1] < 0
-            ):
+                or entity_rect.centery > paddle_rect.centery
+            ) and self.velocity[1] < 0:
                 entity_rect.top = paddle_rect.bottom
                 self.position[1] = entity_rect.y
                 self.velocity[1] *= -1
             # check if collision was from the left
             if (
                 abs(entity_rect.right - paddle_rect.left)
-                < self.__COLLISION_THRESHOLD * 2
+                < self.__COLLISION_THRESHOLD * 1.5
                 and self.velocity[0] > 0
             ):
                 entity_rect.right = paddle_rect.left
@@ -177,7 +177,7 @@ class Ball(PhysicsEntity):
             # check if collision was from the right
             if (
                 abs(entity_rect.left - paddle_rect.right)
-                < self.__COLLISION_THRESHOLD * 2
+                < self.__COLLISION_THRESHOLD * 1.5
                 and self.velocity[0] < 0
             ):
                 entity_rect.left = paddle_rect.right
