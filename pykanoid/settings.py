@@ -3,3 +3,4 @@ WINDOW_HEIGHT = 768
 BACKGROUND_COLOR = "Black"
 TOTAL_LIVES = 3
 FONT_FILE_PATH = "data/font/PixelEmulator-xq08.ttf"
+VOLUME = 0.4

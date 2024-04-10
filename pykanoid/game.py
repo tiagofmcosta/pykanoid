@@ -68,7 +68,11 @@ class Game:
         )
 
         self.life_lost_sound = pygame.mixer.Sound("data/audio/life_lost.wav")
-        self.life_lost_sound.set_volume(0.4)
+        self.life_lost_sound.set_volume(VOLUME)
+        self.game_start_sound = pygame.mixer.Sound("data/audio/game_start.flac")
+        self.game_start_sound.set_volume(VOLUME)
+        self.theme_music = pygame.mixer.Sound("data/audio/theme.mp3")
+        self.theme_music.set_volume(VOLUME * 0.2)
 
     def run(self):
         previous_time = time.time()
@@ -106,6 +110,9 @@ class Game:
             self.paddle.update(dt, (self.movement[1] - self.movement[0], 0))
 
             if self.status.state == State.IDLE:
+                if not pygame.mixer.get_busy():
+                    self.theme_music.play()
+
                 self.game_surface.blit(
                     self.start_instructions_surface,
                     (
@@ -116,6 +123,8 @@ class Game:
                 )
                 self.ball.update(dt)
             elif self.status.state == State.START:
+                pygame.mixer.stop()
+                self.game_start_sound.play()
                 self.tilemap.generate_random()
                 self.status.set_state(State.WAITING_BALL_RELEASE)
             elif self.status.state == State.PLAYING:
