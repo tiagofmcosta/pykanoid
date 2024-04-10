@@ -14,6 +14,7 @@ class State(Enum):
     GAME_LOST = auto()
     GAME_WON = auto()
     NEXT_LEVEL = auto()
+    RESTART = auto()
 
 
 class InvalidTransitionError(Exception):
@@ -42,9 +43,13 @@ class StateMachine:
         State.GAME_LOST: {State.IDLE},
         State.GAME_WON: {State.IDLE},
         State.NEXT_LEVEL: {State.WAITING_BALL_RELEASE},
+        State.RESTART: {State.IDLE},
     }
 
     def transition(self, current_state, next_state) -> State:
+        if next_state == State.RESTART:
+            return next_state
+
         valid_transitions = self.__valid_transitions[current_state]
 
         if next_state in valid_transitions:
