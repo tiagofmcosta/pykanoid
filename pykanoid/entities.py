@@ -55,7 +55,7 @@ class Paddle(PhysicsEntity):
 
 
 class Ball(PhysicsEntity):
-    __INITIAL_ACCELERATION_RATIO = 0.45
+    __INITIAL_ACCELERATION_RATIO = 0.4
     __MAX_ACCELERATION_RATIO = 0.7
     __HIT_THRESHOLD_RATIO = 0.03
     __COLLISION_THRESHOLD = 5
@@ -111,10 +111,34 @@ class Ball(PhysicsEntity):
         entity_rect: pygame.Rect = self.rect()
         paddle_rect: pygame.Rect = self.game.paddle.rect()
 
+        self.__check_paddle_collision(entity_rect, paddle_rect)
+        self.__check_game_area_collision(entity_rect)
+        self.__check_tiles_collision(entity_rect)
+
+    def __check_game_area_collision(self, entity_rect):
+        # check if colliding with the bottom
+        if entity_rect.bottom >= self.game.GAME_AREA_SIZE[1] and self.velocity[1] > 0:
+            self.game.status.set_state(State.LIFE_LOST)
+        # check if colliding with the top
+        if entity_rect.top <= 0 and self.velocity[1] < 0:
+            entity_rect.top = 0
+            self.position[1] = entity_rect.y
+            self.velocity[1] *= -1
+        # check if colliding with the left
+        if entity_rect.left <= 0 and self.velocity[0] < 0:
+            entity_rect.left = 0
+            self.position[0] = entity_rect.x
+            self.velocity[0] *= -1
+        # check if colliding with the right
+        if entity_rect.right >= self.game.GAME_AREA_SIZE[0] and self.velocity[0] > 0:
+            entity_rect.right = self.game.GAME_AREA_SIZE[0]
+            self.position[0] = entity_rect.x
+            self.velocity[0] *= -1
+
+    def __check_paddle_collision(self, entity_rect, paddle_rect):
         entity_mask: pygame.Mask = self.mask()
         paddle_mask: pygame.Mask = self.game.paddle.mask()
 
-        # check collision with paddle
         if paddle_mask.overlap(
             entity_mask,
             (
@@ -128,6 +152,8 @@ class Ball(PhysicsEntity):
                 and entity_rect.centery <= paddle_rect.centery
                 and self.velocity[1] > 0
             ):
+                entity_rect.bottom = paddle_rect.top
+                self.position[1] = entity_rect.y
                 self.velocity[1] *= -1
                 self.paddle_hits += 1
             # check if collision was from bellow
@@ -136,6 +162,8 @@ class Ball(PhysicsEntity):
                 and entity_rect.centery >= paddle_rect.centery
                 and self.velocity[1] < 0
             ):
+                entity_rect.top = paddle_rect.bottom
+                self.position[1] = entity_rect.y
                 self.velocity[1] *= -1
             # check if collision was from the left
             if (
@@ -143,6 +171,8 @@ class Ball(PhysicsEntity):
                 < self.__COLLISION_THRESHOLD * 2
                 and self.velocity[0] > 0
             ):
+                entity_rect.right = paddle_rect.left
+                self.position[0] = entity_rect.x
                 self.velocity[0] *= -1
             # check if collision was from the right
             if (
@@ -150,28 +180,14 @@ class Ball(PhysicsEntity):
                 < self.__COLLISION_THRESHOLD * 2
                 and self.velocity[0] < 0
             ):
+                entity_rect.left = paddle_rect.right
+                self.position[0] = entity_rect.x
                 self.velocity[0] *= -1
 
-        # check collision with game edges
-        # check if colliding with the bottom
-        if entity_rect.bottom >= self.game.GAME_AREA_SIZE[1] and self.velocity[1] > 0:
-            self.game.status.set_state(State.LIFE_LOST)
-        # check if colliding with the top
-        if entity_rect.top <= 0 and self.velocity[1] < 0:
-            self.velocity[1] *= -1
-        # check if colliding with the left
-        if entity_rect.left <= 0 and self.velocity[0] < 0:
-            self.velocity[0] *= -1
-        # check if colliding with the right
-        if entity_rect.right >= self.game.GAME_AREA_SIZE[0] and self.velocity[0] > 0:
-            self.velocity[0] *= -1
-
-        # check collision with tiles
+    def __check_tiles_collision(self, entity_rect):
         tiles: list[Tile] = self.game.tilemap.tile_list()
         tile_recs: list[Rect] = self.game.tilemap.rects()
-
         collision_tile_index = entity_rect.collidelist(tile_recs)
-
         if collision_tile_index > 0:
             self.game.tilemap.trigger_hit(tiles[collision_tile_index])
             tile_rec: Rect = tile_recs[collision_tile_index]
@@ -181,22 +197,30 @@ class Ball(PhysicsEntity):
                 abs(entity_rect.bottom - tile_rec.top) < self.__COLLISION_THRESHOLD
                 and self.velocity[1] > 0
             ):
+                entity_rect.bottom = tile_rec.top
+                self.position[1] = entity_rect.y
                 self.velocity[1] *= -1
             # check if collision was from bellow
             if (
                 abs(entity_rect.top - tile_rec.bottom) < self.__COLLISION_THRESHOLD
                 and self.velocity[1] < 0
             ):
+                entity_rect.top = tile_rec.bottom
+                self.position[1] = entity_rect.y
                 self.velocity[1] *= -1
             # check if collision was from the left
             if (
                 abs(entity_rect.right - tile_rec.left) < self.__COLLISION_THRESHOLD
                 and self.velocity[0] > 0
             ):
+                entity_rect.right = tile_rec.left
+                self.position[0] = entity_rect.x
                 self.velocity[0] *= -1
             # check if collision was from the right
             if (
                 abs(entity_rect.left - tile_rec.right) < self.__COLLISION_THRESHOLD
                 and self.velocity[0] < 0
             ):
+                entity_rect.left = tile_rec.right
+                self.position[0] = entity_rect.x
                 self.velocity[0] *= -1
