@@ -75,6 +75,7 @@ class Ball(PhysicsEntity):
         self.velocity = [RANDOM_GENERATOR.choice((-1, 1)), -1]
         self.paddle_hits = 0
         self.acceleration = self.__initial_acceleration
+
         self.collision_sound = pygame.mixer.Sound("data/audio/collision.wav")
         self.collision_sound.set_volume(VOLUME)
 

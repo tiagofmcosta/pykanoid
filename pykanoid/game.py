@@ -19,6 +19,9 @@ class Game:
 
     def __init__(self):
         pygame.init()
+        pygame.mixer.pre_init(44100, -16, 2, 512)
+        pygame.mixer.init()
+
         pygame.display.set_caption("Pykanoid")
 
         self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
@@ -67,12 +70,8 @@ class Game:
             "Press ENTER to start", False, "White"
         )
 
-        self.life_lost_sound = pygame.mixer.Sound("data/audio/life_lost.wav")
-        self.life_lost_sound.set_volume(VOLUME)
-        self.game_start_sound = pygame.mixer.Sound("data/audio/game_start.flac")
-        self.game_start_sound.set_volume(VOLUME)
-        self.theme_music = pygame.mixer.Sound("data/audio/theme.mp3")
-        self.theme_music.set_volume(VOLUME * 0.2)
+        self.sound_life_lost = pygame.mixer.Sound("data/audio/life_lost.wav")
+        self.sound_life_lost.set_volume(VOLUME)
 
     def run(self):
         previous_time = time.time()
@@ -85,8 +84,7 @@ class Game:
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
+                    Game.__quit()
 
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_LEFT:
@@ -110,8 +108,8 @@ class Game:
             self.paddle.update(dt, (self.movement[1] - self.movement[0], 0))
 
             if self.status.state == State.IDLE:
-                if not pygame.mixer.get_busy():
-                    self.theme_music.play()
+                if not pygame.mixer.music.get_busy():
+                    Game.__play_music_theme()
 
                 self.game_surface.blit(
                     self.start_instructions_surface,
@@ -123,8 +121,8 @@ class Game:
                 )
                 self.ball.update(dt)
             elif self.status.state == State.START:
-                pygame.mixer.stop()
-                self.game_start_sound.play()
+                Game.__play_music_game_start()
+                Game.__queue_music_game()
                 self.tilemap.generate_random()
                 self.status.set_state(State.WAITING_BALL_RELEASE)
             elif self.status.state == State.PLAYING:
@@ -134,15 +132,19 @@ class Game:
                 if self.status.lives == 0:
                     self.status.set_state(State.GAME_LOST)
                 else:
-                    self.life_lost_sound.play()
+                    self.sound_life_lost.play()
                     self.status.set_state(State.WAITING_BALL_RELEASE)
             elif self.status.state == State.LEVEL_CLEARED:
                 self.status.set_state(State.GAME_WON)
             elif self.status.state == State.WAITING_BALL_RELEASE:
                 self.ball.update(dt)
             elif self.status.state == State.GAME_LOST:
+                Game.__play_music_game_over()
+                Game.__queue_music_theme()
                 self.status.set_state(State.IDLE)
             elif self.status.state == State.GAME_WON:
+                Game.__play_music_game_won()
+                Game.__queue_music_theme()
                 self.status.set_state(State.IDLE)
             elif self.status.state == State.NEXT_LEVEL:
                 pass
@@ -158,3 +160,41 @@ class Game:
             self.screen.blit(self.game_surface, (0, self.HEADER_AREA_SIZE[1]))
 
             pygame.display.update()
+
+    @staticmethod
+    def __play_music_theme():
+        pygame.mixer.music.load("data/audio/theme.wav")
+        pygame.mixer.music.set_volume(VOLUME)
+        pygame.mixer.music.play(-1, 0.5)
+
+    @staticmethod
+    def __queue_music_theme():
+        pygame.mixer.music.queue("data/audio/theme.wav")
+
+    @staticmethod
+    def __queue_music_game():
+        # pygame.mixer.music.queue("data/audio/game.wav")
+        pass
+
+    @staticmethod
+    def __play_music_game_start():
+        pygame.mixer.music.load("data/audio/game_start.wav")
+        pygame.mixer.music.set_volume(VOLUME)
+        pygame.mixer.music.play()
+
+    @staticmethod
+    def __play_music_game_over():
+        pygame.mixer.music.load("data/audio/game_over.wav")
+        pygame.mixer.music.set_volume(VOLUME)
+        pygame.mixer.music.play()
+
+    @staticmethod
+    def __play_music_game_won():
+        pygame.mixer.music.load("data/audio/game_won.wav")
+        pygame.mixer.music.set_volume(VOLUME)
+        pygame.mixer.music.play()
+
+    @staticmethod
+    def __quit():
+        pygame.quit()
+        sys.exit()
