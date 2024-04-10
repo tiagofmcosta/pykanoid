@@ -2,6 +2,7 @@ import pygame
 from pygame import Surface
 from pytmx.util_pygame import load_pygame
 
+from pykanoid.status import State
 from pykanoid.tile import Tile, TileColor
 from pykanoid.utils import load_images, RANDOM_GENERATOR
 from pykanoid.settings import *
@@ -35,7 +36,8 @@ class Tilemap:
         self.title_map_layer = title_map_data.get_layer_by_name("base")
 
     def generate_random(self):
-        colors = [c for c in list(TileColor) if c != TileColor.GREY]
+        colors = list(TileColor)
+
         for x in range(self.grid_size[0]):
             for y in range(self.grid_size[1]):
                 if RANDOM_GENERATOR.random() > 0.65:
@@ -82,13 +84,8 @@ class Tilemap:
             else:
                 del self.tilemap[tile.position]
 
-    def __draw_border_on_tile_surface(self, surface: Surface):
-        pygame.draw.rect(
-            surface,
-            BACKGROUND_COLOR,
-            [0, 0, self.tile_size[0], self.tile_size[1]],
-            1,
-        )
+            if self.__remaining_tiles() == 0:
+                self.game.status.set_state(State.LEVEL_CLEARED)
 
     def render(self, surface: pygame.Surface):
         if not self.tilemap:
@@ -116,3 +113,14 @@ class Tilemap:
                     tile.position[1] * self.tile_size[1],
                 ),
             )
+
+    def __draw_border_on_tile_surface(self, surface: Surface):
+        pygame.draw.rect(
+            surface,
+            BACKGROUND_COLOR,
+            [0, 0, self.tile_size[0], self.tile_size[1]],
+            1,
+        )
+
+    def __remaining_tiles(self):
+        return [d for d in self.tilemap if self.tilemap[d].strength > 0]
