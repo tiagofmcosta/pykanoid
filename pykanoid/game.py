@@ -67,6 +67,9 @@ class Game:
             "Press ENTER to start", False, "White"
         )
 
+        self.life_lost_sound = pygame.mixer.Sound("data/audio/life_lost.wav")
+        self.life_lost_sound.set_volume(0.4)
+
     def run(self):
         previous_time = time.time()
         while True:
@@ -122,6 +125,7 @@ class Game:
                 if self.status.lives == 0:
                     self.status.set_state(State.GAME_LOST)
                 else:
+                    self.life_lost_sound.play()
                     self.status.set_state(State.WAITING_BALL_RELEASE)
             elif self.status.state == State.LEVEL_CLEARED:
                 self.status.set_state(State.GAME_WON)
