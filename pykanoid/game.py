@@ -104,6 +104,8 @@ class Game:
                     ):
                         self.ball.launch()
                         self.status.set_state(State.PLAYING)
+                    if event.key == pygame.K_r:
+                        self.status.set_state(State.RESTART)
 
             self.paddle.update(dt, (self.movement[1] - self.movement[0], 0))
 
@@ -148,6 +150,9 @@ class Game:
                 self.status.set_state(State.IDLE)
             elif self.status.state == State.NEXT_LEVEL:
                 pass
+            elif self.status.state == State.RESTART:
+                self.ball.reset()
+                self.status.set_state(State.IDLE)
 
             self.header.update(self.status)
 
