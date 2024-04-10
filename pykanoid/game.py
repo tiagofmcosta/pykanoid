@@ -106,6 +106,8 @@ class Game:
                         self.status.set_state(State.PLAYING)
                     if event.key == pygame.K_r:
                         self.status.set_state(State.RESTART)
+                    if event.key == pygame.K_q:
+                        Game.__quit()
 
             self.paddle.update(dt, (self.movement[1] - self.movement[0], 0))
 
