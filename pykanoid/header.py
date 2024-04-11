@@ -3,7 +3,7 @@ from pygame import Surface
 
 from pykanoid.settings import FONT_FILE_PATH
 from pykanoid.status import Status
-from pykanoid.utils import load_image
+from pykanoid.utils import load_image, get_relative_path
 
 
 class Header:
@@ -12,7 +12,7 @@ class Header:
         self.__life_asset = pygame.transform.scale(
             load_image("life/heart_48.png"), (24, 24)
         )
-        self.__font = pygame.font.Font(FONT_FILE_PATH, 24)
+        self.__font = pygame.font.Font(get_relative_path(FONT_FILE_PATH), 24)
 
     def update(self, status: Status):
         self.__status = status

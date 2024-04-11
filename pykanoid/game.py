@@ -10,7 +10,7 @@ from pykanoid.header import Header
 from pykanoid.settings import *
 from pykanoid.status import Status, State
 from pykanoid.tilemap import Tilemap
-from pykanoid.utils import load_image, RANDOM_GENERATOR
+from pykanoid.utils import load_image, RANDOM_GENERATOR, get_relative_path
 
 EVENT_PLAY_THEME_MUSIC = pygame.constants.USEREVENT + 1
 EVENT_PLAY_NEXT_BACKGROUND_MUSIC = pygame.constants.USEREVENT + 2
@@ -26,7 +26,7 @@ class Game:
         pygame.init()
         pygame.display.set_caption("Pykanoid")
 
-        self.__font = pygame.font.Font(FONT_FILE_PATH, 36)
+        self.__font = pygame.font.Font(get_relative_path(FONT_FILE_PATH), 36)
 
         self.status = Status()
         self.movement = [False, False]
@@ -83,7 +83,9 @@ class Game:
         pygame.mixer.init()
         pygame.mixer.set_num_channels(64)
 
-        self.sound_life_lost = pygame.mixer.Sound("data/audio/life_lost.wav")
+        self.sound_life_lost = pygame.mixer.Sound(
+            get_relative_path("data/audio/life_lost.wav")
+        )
         self.sound_life_lost.set_volume(VOLUME)
 
         Game.__play_music_theme()
@@ -191,13 +193,13 @@ class Game:
 
     @staticmethod
     def __play_music_theme():
-        pygame.mixer.music.load("data/audio/theme.wav")
+        pygame.mixer.music.load(get_relative_path("data/audio/theme.wav"))
         pygame.mixer.music.set_volume(VOLUME)
         pygame.mixer.music.play(-1, 0.5)
 
     @staticmethod
     def __play_music_background():
-        dir_path = "data/audio/background"
+        dir_path = get_relative_path("data/audio/background")
         audio_file_index = RANDOM_GENERATOR.randint(
             1, len(fnmatch.filter(os.listdir(dir_path), "*.*"))
         )
@@ -208,21 +210,21 @@ class Game:
 
     @staticmethod
     def __play_music_game_start():
-        pygame.mixer.music.load("data/audio/game_start.wav")
+        pygame.mixer.music.load(get_relative_path("data/audio/game_start.wav"))
         pygame.mixer.music.set_volume(VOLUME)
         pygame.mixer.music.play()
         pygame.mixer.music.set_endevent(EVENT_PLAY_NEXT_BACKGROUND_MUSIC)
 
     @staticmethod
     def __play_music_game_over():
-        pygame.mixer.music.load("data/audio/game_over.wav")
+        pygame.mixer.music.load(get_relative_path("data/audio/game_over.wav"))
         pygame.mixer.music.set_volume(VOLUME)
         pygame.mixer.music.play()
         pygame.mixer.music.set_endevent(EVENT_PLAY_THEME_MUSIC)
 
     @staticmethod
     def __play_music_game_won():
-        pygame.mixer.music.load("data/audio/game_won.wav")
+        pygame.mixer.music.load(get_relative_path("data/audio/game_won.wav"))
         pygame.mixer.music.set_volume(VOLUME)
         pygame.mixer.music.play()
         pygame.mixer.music.set_endevent(EVENT_PLAY_THEME_MUSIC)
@@ -231,3 +233,7 @@ class Game:
     def __quit():
         pygame.quit()
         sys.exit()
+
+
+if __name__ == "__main__":
+    Game().run()

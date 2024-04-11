@@ -4,7 +4,7 @@ from pytmx.util_pygame import load_pygame
 
 from pykanoid.status import State
 from pykanoid.tile import Tile, TileColor
-from pykanoid.utils import load_images, RANDOM_GENERATOR
+from pykanoid.utils import load_images, RANDOM_GENERATOR, get_relative_path
 from pykanoid.settings import *
 
 NEIGHBOR_OFFSETS = [
@@ -32,7 +32,7 @@ class Tilemap:
         for t_color in TileColor:
             self.__assets["tiles"][t_color] = load_images(f"tiles/{t_color}")
 
-        title_map_data = load_pygame("data/levels/title_map.tmx")
+        title_map_data = load_pygame(get_relative_path("data/levels/title_map.tmx"))
         self.title_map_layer = title_map_data.get_layer_by_name("base")
 
     def generate_random(self):

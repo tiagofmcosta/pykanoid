@@ -4,7 +4,7 @@ from pygame import Rect, Surface
 from pykanoid.settings import VOLUME
 from pykanoid.status import State
 from pykanoid.tile import Tile
-from pykanoid.utils import RANDOM_GENERATOR
+from pykanoid.utils import RANDOM_GENERATOR, get_relative_path
 
 
 class PhysicsEntity:
@@ -76,7 +76,9 @@ class Ball(PhysicsEntity):
         self.paddle_hits = 0
         self.acceleration = self.__initial_acceleration
 
-        self.collision_sound = pygame.mixer.Sound("data/audio/collision.wav")
+        self.collision_sound = pygame.mixer.Sound(
+            get_relative_path("data/audio/collision.wav")
+        )
         self.collision_sound.set_volume(VOLUME)
 
     def launch(self):
